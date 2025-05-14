@@ -1,0 +1,48 @@
+# Исключение системных файлов
+.DS_Store
+Thumbs.db
+
+# Исключение локальных конфигураций
+.env
+.env.local
+.env.*.local
+
+# Исключение директории node_modules
+node_modules/
+
+# Исключение файлов, созданных npm или yarn
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Исключение файлов, связанных с IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Исключение логов и временных файлов
+logs
+*.log
+*.tmp
+temp/
+
+# Исключение скомпилированных файлов JavaScript
+dist/
+build/
+
+# Исключение файлов, созданных операционной системой
+*.swp
+*.swo
+*~
+
+# Исключение файлов, связанных с тестами
+coverage/
+
+# Исключение файлов, связанных с Docker
+docker-compose.override.yml
+.dockerenv
+
+# Исключение других ненужных файлов
+package-lock.json
+yarn.lock
