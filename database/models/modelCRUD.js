@@ -19,12 +19,15 @@ async function getAllModels() {
                 m.gender,
                 m.color,
                 m.compound,
-                p.platform AS platform
+                p.platform AS platform,
+                m.updated_at AS updated_at,
+                m.is_deleted
             FROM models m
             JOIN brands b ON m.brand_id = b.brand_id
             JOIN articles a ON m.article_id = a.article_id
             JOIN sizes s ON m.size_id = s.size_id
-            JOIN platforms p ON m.platform_id = p.platform_id;
+            JOIN platforms p ON m.platform_id = p.platform_id
+            LIMIT 100;
         `);
         return models;
     } catch (error) {
@@ -186,6 +189,48 @@ async function updateModelById(modelId, pair, category, gender, color, compound)
     } catch (error) {
         console.error('Модель не была обновлена:', error.message)
         throw error
+    }
+}
+
+async function updateModelById(req, res) {
+    const modelId = req.params.id;
+    const updates = req.body;
+
+    // Запрещенные поля для обновления
+    const forbiddenFields = ['model_id', 'brand_id', 'platform_id'];
+
+    // Фильтрация запрещённых полей
+    for (const field of forbiddenFields) {
+        if (field in updates) {
+            return res.status(400).json({ error: `Изменение поля "${field}" запрещено` });
+        }
+    }
+
+    // Проверка наличия модели
+    try {
+        const [existingModel] = await db.execute('SELECT * FROM models WHERE model_id = ?', [modelId]);
+        if (existingModel.length === 0) {
+            return res.status(404).json({ error: 'Модель не найдена' });
+        }
+
+        // Динамическое построение запроса
+        const fields = Object.keys(updates);
+        if (fields.length === 0) {
+            return res.status(400).json({ error: 'Нет данных для обновления' });
+        }
+
+        const setClause = fields.map(field => `${field} = ?`).join(', ');
+        const values = fields.map(field => updates[field]);
+
+        await db.execute(
+            `UPDATE models SET ${setClause} WHERE model_id = ?`,
+            [...values, modelId]
+        );
+
+        res.json({ message: 'Модель успешно обновлена' });
+    } catch (error) {
+        console.error('Ошибка при обновлении модели:', error.message);
+        res.status(500).json({ error: 'Внутренняя ошибка сервера' });
     }
 }
 

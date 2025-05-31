@@ -25,20 +25,32 @@ exports.getAllArticles = async (req, res) => {
     }
 };
 
-// Создание нового артикула
 exports.createArticle = async (req, res) => {
     try {
-        const { newArticleName } = req.body;
+        const { article } = req.body;
 
         // Проверка входных данных
-        if (!newArticleName || typeof newArticleName !== 'string') {
-            return res.status(400).json({ error: 'Некорректное имя артикула: должно быть строкой' });
+        if (!article || typeof article !== 'string' || article.trim() === '') {
+            return res.status(400).json({ error: 'Некорректное имя артикула: должно быть непустой строкой' });
         }
 
-        await createArticle(newArticleName);
+        // Создание нового артикула
+        await createArticle(article);
         res.status(201).json({ message: 'Артикул успешно создан' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Ошибка при создании артикула:', error.message);
+
+        // Обработка конкретных ошибок
+        if (error.message === 'Некорректное имя артикула') {
+            return res.status(400).json({ error: 'Некорректное имя артикула: должно быть непустой строкой' });
+        }
+
+        if (error.message === 'Артикул уже существует') {
+            return res.status(409).json({ error: 'Артикул уже существует. Дубликаты запрещены.' });
+        }
+
+        // Обработка всех остальных ошибок
+        res.status(500).json({ error: 'Ошибка сервера при создании артикула' });
     }
 };
 
@@ -46,24 +58,37 @@ exports.createArticle = async (req, res) => {
 exports.updateArticleById = async (req, res) => {
     try {
         const { id } = req.params;
-        const { newArticleName } = req.body;
+        const { article } = req.body;
 
         // Проверка входных данных
-        if (!newArticleName || typeof newArticleName !== 'string') {
-            return res.status(400).json({ error: 'Некорректное имя артикула: должно быть строкой' });
+        if (!id || isNaN(id)) {
+            return res.status(400).json({ error: 'Некорректный ID артикула' });
         }
 
-        await updateArticleById(id, newArticleName);
+        if (!article || typeof article !== 'string' || article.trim() === '') {
+            return res.status(400).json({ error: 'Поле "article" должно быть непустой строкой' });
+        }
+
+        // Проверка на дубликат
+        const duplicate = await checkForDuplicateArticle(article);
+        if (duplicate) {
+            return res.status(409).json({ error: 'Артикул уже существует. Дубликаты запрещены.' });
+        }
+
+        // Вызов функции обновления
+        await updateArticleById(id, { article });
+
         res.status(200).json({ message: 'Артикул успешно обновлен' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error('Ошибка при обновлении артикула:', error);
+        res.status(500).json({ error: 'Ошибка сервера при обновлении артикула' });
     }
 };
 
 // Удаление артикула по ID
 exports.deleteArticleById = async (req, res) => {
     try {
-        const { id } = req.params; // Исправлено: используем req.params.id
+        const { id } = req.params;
 
         await deleteArticleById(id);
         res.status(200).json({ message: 'Артикул успешно удален' });

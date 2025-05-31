@@ -15,12 +15,14 @@ const apiCategoryRoutes = require(path.join(__dirname, './routes/apiCategoryRout
 const modelRoutes = require(path.join(__dirname, './routes/modelRoutes'));
 const brandRoutes = require(path.join(__dirname, './routes/brandRoutes'));
 const articleRoutes = require(path.join(__dirname, './routes/articleRoutes'));
+const sizeRoutes = require(path.join(__dirname, './routes/sizeRoutes'));
 
 app.use('/api/platforms', platformRoutes);
 app.use('/api/categories', apiCategoryRoutes);
 app.use('/api/models', modelRoutes);
 app.use('/api/brands', brandRoutes);
 app.use('/api/articles', articleRoutes);
+app.use('/api/sizes', sizeRoutes);
 
 // Документация Swagger
 const { specs, swaggerUi } = require('./swagger'); // Импортируем Swagger

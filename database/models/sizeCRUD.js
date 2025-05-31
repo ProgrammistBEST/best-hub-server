@@ -2,6 +2,20 @@ const path = require('path');
 const {db} = require(path.join(__dirname, '../../config/db'));
 const { ensureDatabaseConnection } = require(path.join(__dirname, '../../utils/errorHandler'))
 
+
+async function getAllSizes() {
+    try {
+        ensureDatabaseConnection(db);
+        const [sizes] = await db.query(`
+                SELECT * FROM sizes
+            `)
+        return sizes
+    } catch (error) {
+        console.error({'Ошибка при получении моделей': error.message})
+        throw error
+    }
+}
+
 async function createSize(size) {
     try {
         ensureDatabaseConnection(db);
@@ -15,4 +29,4 @@ async function createSize(size) {
     }
 }
 
-module.exports = { createSize }
+module.exports = { getAllSizes, createSize }
