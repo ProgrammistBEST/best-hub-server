@@ -24,8 +24,8 @@ async function createSize(size) {
             ON DUPLICATE KEY UPDATE size = size`, 
             [size, size])
     } catch (error) {
-        console.error({'Не удалось создать размер:': error.message})
-        throw error
+        console.error('Не удалось создать размер:', error.message);
+        throw error;
     }
 }
 

@@ -40,13 +40,20 @@ exports.getModelById = async (req, res) => {
 
 exports.createModel = async (req, res) => {
     try {
-        const { brand, article, size, sku, pair, category, gender, color, compound, platform } = req.body
-        await createModel(brand, article, size, sku, pair, category, gender, color, compound, platform)
+        const { brand, article, size, sku, pair, category, gender, color, compound, platform } = req.body;
+
+        // Проверка обязательных полей
+        if (!brand || !article || !size || !sku || !platform) {
+            return res.status(400).json({ error: 'Отсутствуют обязательные поля: brand, article, size, sku или platform' });
+        }
+
+        await createModel(brand, article, size, sku, pair, category, gender, color, compound, platform);
         res.status(201).json({ message: 'Модель успешно создана' });
     } catch (error) {
+        console.error('Ошибка при создании модели:', error.message);
         res.status(500).json({ error: error.message });
     }
-}
+};
 
 exports.updateModelById = async (req, res) => {
     try {

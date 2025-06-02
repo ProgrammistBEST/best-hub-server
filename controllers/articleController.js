@@ -1,5 +1,6 @@
 const path = require('path');
 const { getArticleById, getAllArticles, createArticle, updateArticleById, deleteArticleById } = require(path.join(__dirname, '../database/models/articleCRUD'));
+const { checkDuplicate } = require(path.join(__dirname, '../utils/checkDuplicate'));
 
 // Получение артикула по ID
 exports.getArticleById = async (req, res) => {
@@ -25,6 +26,7 @@ exports.getAllArticles = async (req, res) => {
     }
 };
 
+// Создание нового артикула
 exports.createArticle = async (req, res) => {
     try {
         const { article } = req.body;
@@ -32,6 +34,12 @@ exports.createArticle = async (req, res) => {
         // Проверка входных данных
         if (!article || typeof article !== 'string' || article.trim() === '') {
             return res.status(400).json({ error: 'Некорректное имя артикула: должно быть непустой строкой' });
+        }
+
+        // Проверка на дубликат с помощью универсальной утилиты
+        const isDuplicate = await checkDuplicate('articles', { article });
+        if (isDuplicate) {
+            return res.status(409).json({ error: 'Артикул уже существует. Дубликаты запрещены.' });
         }
 
         // Создание нового артикула
@@ -69,9 +77,9 @@ exports.updateArticleById = async (req, res) => {
             return res.status(400).json({ error: 'Поле "article" должно быть непустой строкой' });
         }
 
-        // Проверка на дубликат
-        const duplicate = await checkForDuplicateArticle(article);
-        if (duplicate) {
+        // Проверка на дубликат с помощью универсальной утилиты
+        const isDuplicate = await checkDuplicate('articles', { article }, { excludeField: 'article_id', excludeValue: id });
+        if (isDuplicate) {
             return res.status(409).json({ error: 'Артикул уже существует. Дубликаты запрещены.' });
         }
 
