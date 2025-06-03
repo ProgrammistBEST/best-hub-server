@@ -17,6 +17,15 @@ async function getPlatformById(platformId) {
     }
 }
 
+async function getPlatformId(platformName) {
+    const [rows] = await db.execute(`SELECT platform_id FROM platforms WHERE platform = ?`, [platformName]);
+    if (rows.length === 0) {
+        throw new Error(`Платформа "${platformName}" не найдена`);
+    }
+    return rows[0].platform_id;
+}
+
+
 // Получение всех платформ
 async function getAllPlatforms() {
     try {
@@ -74,6 +83,7 @@ async function deletePlatformById(platformId) {
 
 module.exports = {
     getPlatformById,
+    getPlatformId,
     getAllPlatforms,
     createPlatform,
     updatePlatformById,

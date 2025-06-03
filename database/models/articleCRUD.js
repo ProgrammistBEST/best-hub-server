@@ -1,6 +1,7 @@
 const path = require('path');
 const { db } = require(path.join(__dirname, '../../config/db'));
 const { ensureDatabaseConnection } = require(path.join(__dirname, '../../utils/errorHandler'));
+const { checkDuplicate } = require(path.join(__dirname, '../../utils/checkDuplicate'));
 
 // Получение всех артикулов
 async function getAllArticles() {
@@ -40,29 +41,24 @@ async function createArticle(newArticleName) {
     try {
         ensureDatabaseConnection(db);
 
-        // Проверка на пустое значение
         if (!newArticleName || typeof newArticleName !== 'string' || newArticleName.trim() === '') {
             throw new Error('Некорректное имя артикула');
         }
 
         // Проверка на дубликат
-        const [existing] = await db.query(`
-            SELECT article_id FROM articles
-            WHERE article = ?
-        `, [newArticleName]);
-
-        if (existing.length > 0) {
+        const existing = await checkDuplicate('articles', { article: newArticleName });
+        if (existing) {
             throw new Error('Артикул уже существует');
         }
 
-        // Вставка нового артикула
         await db.execute(`
             INSERT INTO articles (article)
             VALUES (?)
         `, [newArticleName]);
+
     } catch (error) {
         console.error('Ошибка при создании артикула:', error.message);
-        throw error; // Передаем ошибку дальше
+        throw error;
     }
 }
 

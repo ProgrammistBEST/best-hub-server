@@ -2,8 +2,18 @@ const path = require('path');
 const { db } = require(path.join(__dirname, '../../config/db'));
 const { ensureDatabaseConnection } = require(path.join(__dirname, '../../utils/errorHandler'));
 
+async function getExternalArticle(externalArticle, platform) {
+    const [rows] = await db.execute(`
+        SELECT e.* FROM external_articles e
+        JOIN platforms p ON e.platform_id = p.platform_id
+        WHERE p.platform = ? AND e.external_article = ?
+    `, [platform, externalArticle]);
+
+    return rows[0] || null;
+}
+
 // Получение внешнего артикула по ID
-async function getExternalArticle(externalArticleId) {
+async function getExternalArticleById(externalArticleId) {
     try {
         ensureDatabaseConnection(db);
 
@@ -148,6 +158,7 @@ async function deleteExternalArticleById(externalArticleId) {
 
 module.exports = {
     getExternalArticle,
+    getExternalArticleById,
     getAllExternalArticles,
     createExternalArticle,
     updateExternalArticleById,

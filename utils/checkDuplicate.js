@@ -36,31 +36,32 @@ async function checkDuplicate(table, fields, options = {}) {
     }
 }
 
-async function checkForDuplicateExternalArticle(platformId, externalArticle, excludeId = null) {
+async function checkForDuplicateExternalArticle(platform, externalArticle, excludeId = null) {
     try {
         ensureDatabaseConnection(db);
 
-        // Проверка входных данных
         if (!externalArticle || typeof externalArticle !== 'string' || externalArticle.trim() === '') {
             throw new Error('Некорректное значение externalArticle');
         }
-        if (!platformId || typeof platformId !== 'number') {
-            throw new Error('Некорректное значение platformId');
+        if (!platform || typeof platform !== 'string' || platform.trim() === '') {
+            throw new Error('Некорректное значение platform');
         }
 
         const query = excludeId
             ? `
-                SELECT article_id FROM external_articles
-                WHERE platform_id = ? AND external_article = ? AND external_article_id != ?
+                SELECT e.article_id FROM external_articles e
+                JOIN platforms p ON e.platform_id = p.platform_id 
+                WHERE p.platform = ? AND e.external_article = ? AND e.external_article_id != ?
             `
             : `
-                SELECT article_id FROM external_articles
-                WHERE platform_id = ? AND external_article = ?
+                SELECT e.article_id FROM external_articles e
+                JOIN platforms p ON e.platform_id = p.platform_id
+                WHERE p.platform = ? AND e.external_article = ?
             `;
 
         const params = excludeId
-            ? [platformId, externalArticle, excludeId]
-            : [platformId, externalArticle];
+            ? [platform, externalArticle, excludeId]
+            : [platform, externalArticle];
 
         const [rows] = await db.query(query, params);
         return rows.length > 0 ? rows[0].article_id : null;

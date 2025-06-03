@@ -1,10 +1,11 @@
-const { platform } = require('os');
 const path = require('path');
 const { db } = require(path.join(__dirname, '../../config/db'));
 const { ensureDatabaseConnection } = require(path.join(__dirname, '../../utils/errorHandler'))
 const { createArticle } = require(path.join(__dirname, './articleCRUD'))
 const { createSize } = require(path.join(__dirname, './sizeCRUD'))
-const { checkForDuplicateExternalArticle, checkDuplicate } = require(path.join(__dirname, '../../utils/checkDuplicate'))
+const { checkDuplicate } = require(path.join(__dirname, '../../utils/checkDuplicate'))
+const { getExternalArticle, createExternalArticle } = require(path.join(__dirname, './externalArticleCRUD'))
+const { getPlatformId } = require(path.join(__dirname, '../platformCRUD'))
 
 async function getAllModels() {
     try {
@@ -37,65 +38,6 @@ async function getAllModels() {
     }
 }
 
-async function createModelsWithWB(data, brand, platform) {
-    let connection;
-    try {
-        connection = await db.getConnection();
-
-
-        await connection.beginTransaction();
-
-        for (const item of data) {
-            const { article, gender, compound, color, sizes, categories } = item;
-
-            if (!article || !gender || !categories || !sizes || !Array.isArray(sizes)) {
-                console.warn(`Пропущена запись: недостаточно данных для article=${article}`);
-                continue;
-            }
-
-            const safeCompound = compound || null;
-            const safeColor = color || null;
-            const safeCategories = categories || null;
-
-            for (const { techSize, sku } of sizes) {
-                if (await checkDuplicate('models', { sku })) {
-                    console.warn(`SKU "${sku}" уже существует. Пропускаем создание модели.`);
-                    continue;
-                }
-
-                try {
-                    await handleExternalArticle('articles', article, platform);
-                    await createModel(
-                        brand,
-                        article,
-                        techSize,
-                        sku,
-                        20,
-                        safeCategories,
-                        gender,
-                        safeColor,
-                        safeCompound,
-                        platform
-                    );
-                    console.log(`Модель с SKU "${sku}" успешно создана.`);
-                } catch (error) {
-                    console.error(`Ошибка при создании модели для SKU "${sku}":`, error.message);
-                    continue;
-                }
-            }
-        }
-
-        await connection.commit();
-        console.log("Данные успешно загружены в базу данных.");
-    } catch (error) {
-        if (connection) await connection.rollback();
-        console.error("Ошибка при загрузке данных:", error.message);
-        throw error;
-    } finally {
-        if (connection) connection.release();
-    }
-}
-
 // Создание новой модели с заданными параметрами
 async function createModel(brand, article, size, sku, pair = 20, category = null, gender = null, color = null, compound = null, platform) {
     try {
@@ -108,37 +50,43 @@ async function createModel(brand, article, size, sku, pair = 20, category = null
         }
 
         // Шаг 2: Проверка и получение brand_id
-        const brandId = await checkDuplicate('brands', { brand });
-        if (!brandId) {
+        const brandReocrd = await checkDuplicate('brands', { brand });
+        let brandId;
+        if (!brandReocrd || brandReocrd === 0) {
             throw new Error(`Бренд "${brand}" не найден в базе данных.`);
+        } else {
+            brandId = brandReocrd.brand_id
         }
 
         // Шаг 3: Проверка и получение platform_id
-        const platformId = await checkDuplicate('platforms', { platform });
-        if (!platformId) {
+        const platformRecord = await checkDuplicate('platforms', { platform });
+        let platformId;
+        if (!platformRecord || platformRecord === 0) {
             throw new Error(`Платформа "${platform}" не найдена в базе данных.`);
+        } else {
+            platformId = platformRecord.platform_id
         }
 
         // Шаг 4: Проверка наличия артикула
-        const articleId = checkDuplicate('article', {"article": article})
-        if (!articledId || articleId === 0) {
+        const articleRecord = await checkDuplicate('articles', { article });
+        let articleId;
+        if (!articleRecord || articleRecord === 0) {
             await createArticle(article);
-            const [newArticleRow] = await db.execute(
-                `SELECT article_id FROM articles WHERE article = ?`,
-                [article]
-            );
-            articleId = newArticleRow[0].article_id;
+            const newArticleRecord = await checkDuplicate('articles', { article });
+            articleId = newArticleRecord.article_id;
+        } else {
+            articleId = articleRecord.article_id;
         }
 
         // Шаг 5: Проверка наличия размера
-        const [sizeId] = checkDuplicate('size', {"size": size})
-        if (!sizedId || sizeId === 0) {
-            await createsize(size);
-            const [newsizeRow] = await db.execute(
-                `SELECT size_id FROM sizes WHERE size = ?`,
-                [size]
-            );
-            sizeId = newsizeRow[0].size_id;
+        const sizeRecord = await checkDuplicate('sizes', { size });
+        let sizeId;
+        if (!sizeRecord || sizeRecord === 0) {
+            await createSize(size);
+            const newSizeRecord = await checkDuplicate('sizes', { size });
+            sizeId = newSizeRecord.size_id;
+        } else {
+            sizeId = sizeRecord.size_id;
         }
 
         // Шаг 6: Вставка новой модели
@@ -176,6 +124,70 @@ async function createModel(brand, article, size, sku, pair = 20, category = null
     } catch (error) {
         console.error('Ошибка при создании модели:', error.message);
         throw error;
+    }
+}
+
+async function createModelsWithWB(data, brand, platform) {
+    let connection;
+    try {
+        connection = await db.getConnection();
+        await connection.beginTransaction();
+
+        for (const item of data) {
+            const { article, gender, compound, color, sizes, categories } = item;
+
+            if (!article || !gender || !categories || !Array.isArray(sizes)) {
+                console.warn(`Пропущена запись: недостаточно данных для article=${article}`);
+                continue;
+            }
+
+            const safeCompound = compound || null;
+            const safeColor = color || null;
+            const safeCategories = categories || null;
+
+            // Получаем правильный article_id через маппинг WB → Честный знак
+            let articleName;
+            try {
+                articleName  = await handleExternalArticle(article, platform);
+            } catch (err) {
+                console.error(`Не удалось обработать артикул "${article}"`, err.message);
+                continue;
+            }
+
+            for (const { techSize, sku } of sizes) {
+                if (await checkDuplicate('models', { sku })) {
+                    console.warn(`SKU "${sku}" уже существует. Пропускаем.`);
+                    continue;
+                }
+
+                try {
+                    await createModel(
+                        brand,
+                        articleName,
+                        techSize,
+                        sku,
+                        20,
+                        safeCategories,
+                        gender,
+                        safeColor,
+                        safeCompound,
+                        platform
+                    );
+                    console.log(`Модель с SKU "${sku}" успешно создана.`);
+                } catch (err) {
+                    console.error(`Ошибка при создании модели SKU "${sku}":`, err.message);
+                }
+            }
+        }
+
+        await connection.commit();
+        console.log("Все модели успешно обработаны.");
+    } catch (error) {
+        if (connection) await connection.rollback();
+        console.error("Ошибка транзакции:", error.message);
+        throw error;
+    } finally {
+        if (connection) connection.release();
     }
 }
 
@@ -237,9 +249,8 @@ async function updateModelById(req, res) {
     }
 }
 
-async function handleExternalArticle(connection, article, platform) {
+async function handleExternalArticle(article, platform) {
     try {
-        // Проверка входных данных
         if (!article || typeof article !== 'string' || article.trim() === '') {
             throw new Error('Некорректное значение article');
         }
@@ -247,40 +258,21 @@ async function handleExternalArticle(connection, article, platform) {
             throw new Error('Некорректное значение platform');
         }
 
-        // Проверка наличия внешнего артикула
-        const externalArticle = await checkForDuplicateExternalArticle(platformId, article);
-        if (externalArticle) {
-            return externalArticle; // Возвращаем article_id
+        const existingExternal = await getExternalArticle(article, platform);
+        if (existingExternal) {
+            return article;
         }
 
-        // Проверка наличия базового артикула
-        const articleRecord = await checkDuplicate('articles', { article });
-        let articleId;
-        if (articleRecord) {
-            articleId = articleRecord.article_id;
-        } else {
-            // Если базовый артикул отсутствует, создаем его
+        let articleRecord = await checkDuplicate('articles', { article });
+        if (!articleRecord) {
             await createArticle(article);
-            const newArticleRecord = await checkDuplicate('articles', { article });
-            articleId = newArticleRecord.article_id;
+            articleRecord = await checkDuplicate('articles', { article }); // повторная проверка
         }
+        const platformId = await getPlatformId(platform);
 
-        // Создаем или обновляем запись в external_articles
-        await connection.execute(
-            `
-            INSERT INTO external_articles (article_id, external_article, platform_id)
-            VALUES (?, ?, ?)
-            ON DUPLICATE KEY UPDATE article_id = VALUES(article_id)
-            `,
-            [articleId, article, platformId]
-        );
+        await createExternalArticle(articleRecord.article_id, article, platformId);
 
-        // Получаем article_id созданной или обновленной записи
-        const [rows] = await connection.execute(
-            `SELECT article_id FROM external_articles WHERE platform_id = ? AND external_article = ?`,
-            [platformId, article]
-        );
-        return rows[0].article_id;
+        return article;
     } catch (error) {
         console.error('Ошибка при обработке внешнего артикула:', error.message);
         throw error;
