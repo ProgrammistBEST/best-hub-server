@@ -18,9 +18,15 @@ async function getExternalArticleById(externalArticleId) {
         ensureDatabaseConnection(db);
 
         const [rows] = await db.query(`
-            SELECT external_article_id, article_id, external_article, platform_id
-            FROM external_articles
-            WHERE external_article_id = ?
+            SELECT 
+                ea.external_article_id, 
+                a.article AS article, 
+                ea.external_article, 
+                p.platform AS platform
+            FROM external_articles ea
+            JOIN platforms p ON ea.platform_id = p.platform_id
+            JOIN articles a ON ea.article_id = a.article_id
+            WHERE ea.external_article_id = ?
         `, [externalArticleId]);
 
         if (rows.length === 0) {
@@ -40,8 +46,14 @@ async function getAllExternalArticles() {
         ensureDatabaseConnection(db);
 
         const [externalArticles] = await db.query(`
-            SELECT external_article_id, article_id, external_article, platform_id
-            FROM external_articles
+            SELECT 
+                ea.external_article_id, 
+                a.article AS article, 
+                ea.external_article, 
+                p.platform AS platform
+            FROM external_articles ea
+            JOIN platforms p ON ea.platform_id = p.platform_id
+            JOIN articles a ON ea.article_id = a.article_id
         `);
         return externalArticles;
     } catch (error) {

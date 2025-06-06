@@ -43,10 +43,17 @@ exports.createModel = async (req, res) => {
         const { brand, article, size, sku, pair, category, gender, color, compound, platform } = req.body;
 
         // Проверка обязательных полей
-        if (!brand || !article || !size || !sku || !platform) {
-            return res.status(400).json({ error: 'Отсутствуют обязательные поля: brand, article, size, sku или platform' });
+        if (!brand || !article || !size || !platform) {
+            return res.status(400).json({ error: 'Отсутствуют обязательные поля: brand, article, size или platform' });
         }
 
+        // Если платформа "BestHub" (без учета регистра), sku не обязателен
+        const isBestHub = platform && platform.toLowerCase() === 'besthub';
+        if (!isBestHub && !sku) {
+            return res.status(400).json({ error: 'Для данной платформы поле SKU является обязательным' });
+        }
+
+        // Вызов функции создания модели
         await createModel(brand, article, size, sku, pair, category, gender, color, compound, platform);
         res.status(201).json({ message: 'Модель успешно создана' });
     } catch (error) {

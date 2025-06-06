@@ -43,34 +43,32 @@ async function createModel(brand, article, size, sku, pair = 20, category = null
     try {
         ensureDatabaseConnection(db);
 
-        // Шаг 1: Проверка существования SKU
-        const existingSKU = await checkDuplicate('models', { sku });
-        if (existingSKU) {
-            throw new Error('SKU уже существует. Дубликаты запрещены.');
+        // Шаг 1: Проверка существования SKU (если он указан)
+        if (sku) {
+            const existingSKU = await checkDuplicate('models', { sku });
+            if (existingSKU) {
+                throw new Error('SKU уже существует. Дубликаты запрещены.');
+            }
         }
 
         // Шаг 2: Проверка и получение brand_id
-        const brandReocrd = await checkDuplicate('brands', { brand });
-        let brandId;
-        if (!brandReocrd || brandReocrd === 0) {
+        const brandRecord = await checkDuplicate('brands', { brand });
+        if (!brandRecord) {
             throw new Error(`Бренд "${brand}" не найден в базе данных.`);
-        } else {
-            brandId = brandReocrd.brand_id
         }
+        const brandId = brandRecord.brand_id;
 
         // Шаг 3: Проверка и получение platform_id
         const platformRecord = await checkDuplicate('platforms', { platform });
-        let platformId;
-        if (!platformRecord || platformRecord === 0) {
+        if (!platformRecord) {
             throw new Error(`Платформа "${platform}" не найдена в базе данных.`);
-        } else {
-            platformId = platformRecord.platform_id
         }
+        const platformId = platformRecord.platform_id;
 
         // Шаг 4: Проверка наличия артикула
         const articleRecord = await checkDuplicate('articles', { article });
         let articleId;
-        if (!articleRecord || articleRecord === 0) {
+        if (!articleRecord) {
             await createArticle(article);
             const newArticleRecord = await checkDuplicate('articles', { article });
             articleId = newArticleRecord.article_id;
@@ -81,7 +79,7 @@ async function createModel(brand, article, size, sku, pair = 20, category = null
         // Шаг 5: Проверка наличия размера
         const sizeRecord = await checkDuplicate('sizes', { size });
         let sizeId;
-        if (!sizeRecord || sizeRecord === 0) {
+        if (!sizeRecord) {
             await createSize(size);
             const newSizeRecord = await checkDuplicate('sizes', { size });
             sizeId = newSizeRecord.size_id;
@@ -111,7 +109,7 @@ async function createModel(brand, article, size, sku, pair = 20, category = null
                 platformId,
                 articleId,
                 sizeId,
-                sku,
+                sku || null, // Если sku не указан, передаем NULL
                 pair,
                 category,
                 gender,

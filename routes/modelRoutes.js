@@ -153,7 +153,7 @@ router.get('/', modelController.getAllModels);
  *       500:
  *         description: Ошибка сервера
  */
-router.post('/wb', modelController.createModelsWithWB);
+router.post('/wildberies', modelController.createModelsWithWB);
 
 /**
  * @swagger

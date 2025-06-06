@@ -41,21 +41,19 @@ async function createArticle(newArticleName) {
     try {
         ensureDatabaseConnection(db);
 
+        // Проверка входных данных
         if (!newArticleName || typeof newArticleName !== 'string' || newArticleName.trim() === '') {
             throw new Error('Некорректное имя артикула');
         }
 
-        // Проверка на дубликат
-        const existing = await checkDuplicate('articles', { article: newArticleName });
-        if (existing) {
-            throw new Error('Артикул уже существует');
-        }
-
+        // Попытка создания артикула с обработкой дубликатов
         await db.execute(`
             INSERT INTO articles (article)
             VALUES (?)
+            ON DUPLICATE KEY UPDATE article = article
         `, [newArticleName]);
 
+        console.log(`Артикул "${newArticleName}" создан или уже существует.`);
     } catch (error) {
         console.error('Ошибка при создании артикула:', error.message);
         throw error;

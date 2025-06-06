@@ -24,7 +24,7 @@ app.use('/api/models', modelRoutes);
 app.use('/api/brands', brandRoutes);
 app.use('/api/articles', articleRoutes);
 app.use('/api/sizes', sizeRoutes);
-app.use('/api/articles/external', externalArticleRoutes);
+app.use('/api/external-articles', externalArticleRoutes);
 
 // Документация Swagger
 const { specs, swaggerUi } = require('./swagger'); // Импортируем Swagger
