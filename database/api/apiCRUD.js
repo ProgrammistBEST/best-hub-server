@@ -46,13 +46,13 @@ async function createApi(newApiName, brand, platform, category, expiration_date)
         await db.execute(`
             INSERT INTO apis (token, brand, platform, category, expiration_date)
             VALUES (
-                ?
-                (SELECT brand_id  FROM brands WHERE brand = ?)
-                (SELECT platform_id FROM platforms WHERE platform = ?)
-                (SELECT api_category_id FROM api_categories WHERE api_category = ?) 
+                ?,
+                (SELECT brand_id FROM brands WHERE brand = ?),
+                (SELECT platform_id FROM platforms WHERE platform = ?),
+                (SELECT api_category_id FROM api_categories WHERE api_category = ?),
                 ?
             )
-            ON DUBLICATE KEY UPDATE token = token 
+            ON DUPLICATE KEY UPDATE token = token 
             `,
             [newApiName, brand, platform, category, expiration_date]
         );
@@ -91,4 +91,4 @@ async function deleteApiById(apiId) {
     }
 }
 
-module.exports = {getApi};
+module.exports = { getApi, getAllApis, createApi, updateApiById, deleteApiById};
