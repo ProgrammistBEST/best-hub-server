@@ -1,5 +1,5 @@
 const path = require('path');
-const { getAllModels, createModelsWithWB, getModelById, createModel, updateModelById } = require(path.join(__dirname, '../database/models/modelCRUD'));
+const { getAllModels, createModelsWithWB, getModelById, getModelsByBrandAndPlatform, createModel, updateModelById } = require(path.join(__dirname, '../database/models/modelCRUD'));
 const { getApi } = require(path.join(__dirname, '../database/api/apiCRUD'));
 const { getDataFromWbCards } = require(path.join(__dirname, '../services/getData/getDataFromWBCards'));
 
@@ -7,6 +7,18 @@ const { getDataFromWbCards } = require(path.join(__dirname, '../services/getData
 exports.getAllModels = async (req, res) => {
     try {
         const models = await getAllModels()
+        if (models.length == 0) return res.status(404).json({ error: 'Модели не найдены' });
+        res.status(200).json(models)
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+// Получение всех моделей по бренду и платформе
+exports.getModelsByBrandAndPlatform = async (req, res) => {
+    try {
+        const { brandId, platformId } = req.body;
+        const models = await getModelsByBrandAndPlatform(brandId, platformId)
         if (models.length == 0) return res.status(404).json({ error: 'Модели не найдены' });
         res.status(200).json(models)
     } catch (error) {

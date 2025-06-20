@@ -1,6 +1,10 @@
-const path = require('path');
 const express = require('express');
 const router = express.Router();
-const barcodeController = require(path.join(__dirname, '../controllers/barcodeController'));
+const barcodeController = require('../controllers/barcodeController');
 
-router.post('/', barcodeController.arm2)
+// Универсальный маршрут для всех брендов
+router.post('/', async (req, res) => {
+    barcodeController.createBarcodeHandler(req, res);
+});
+
+module.exports = router;

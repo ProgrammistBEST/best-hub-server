@@ -205,6 +205,27 @@ async function getModelById(modelId) {
     }
 }
 
+async function getModelsByBrandAndPlatform(brandId, platformId) {
+    try {
+        ensureDatabaseConnection(db);
+
+        const query = `
+            SELECT a.article, s.size 
+            FROM models m
+            JOIN articles a ON m.article_id = a.article_id
+            JOIN sizes s ON m.size_id = s.size_id 
+            WHERE m.brand_id = ? AND m.platform_id = ?
+        `;
+        const [models] = await db.query(query, [brandId, platformId]);
+
+        console.log({ brandId, platformId, models });
+        return models;
+    } catch (error) {
+        console.error({ message: 'Ошибка при получении модели:', error: error.message });
+        throw error;
+    }
+}
+
 async function updateModelById(req, res) {
     const modelId = req.params.id;
     const updates = req.body;
@@ -277,4 +298,4 @@ async function handleExternalArticle(article, platform) {
     }
 }
 
-module.exports = { getAllModels, createModelsWithWB, getModelById, createModel, updateModelById }
+module.exports = { getAllModels, createModelsWithWB, getModelById, getModelsByBrandAndPlatform, createModel, updateModelById }

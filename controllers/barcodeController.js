@@ -1,44 +1,77 @@
-// const path = require('path')
-const { arm2 } = require('../database/barcodes/arm2')
-const { getApi }= require('../database/api/apiCRUD')
-const { getDataFromWbCards } = require('../services/getData/getDataFromWBCards');
+const path = require('path');
+const { getApi } = require(path.join(__dirname, '../database/api/apiCRUD'));
+const { getDataFromWbCards } = require(path.join(__dirname, '../services/getData/getDataFromWBCards'));
+const { filterDataCardsWB } = require(path.join(__dirname, '../utils/filterData'));
+const { convertDataToPdf } = require('../database/barcodes/utils/barcodeUtils');
+const { createPdfArm2 } = require('../database/barcodes/brands/arm2');
+const { createPdfArmbest } = require('../database/barcodes/brands/barcodeArmbest');
+const { createPdfBest26 } = require('../database/barcodes/brands/best26');
+const { createPdfBestShoes } = require('../database/barcodes/brands/bestshoes');
 
-exports.arm2 = async (req, res) => {
+// Маппинг брендов
+const brandMapping = {
+    ARM2: {
+        function: createPdfArm2,
+        tuSummerSmall: "ТУ 15.20.11-002-0103228292-2022",
+        tuSummerBig: "ТУ 15.20.11-001-0188541950-2022",
+    },
+    ARMBEST: {
+        function: createPdfArmbest,
+        tuSummerSmall: "ТУ 15.20.11-002-0103228292-2022",
+        tuSummerBig: "ТУ 15.20.11-001-0188541950-2022",
+    },
+    BESTSHOES: {
+        function: createPdfBestShoes,
+        tuSummerSmall: "ТУ 15.20.11-001-0138568596-2022",
+        tuSummerBig: "ТУ 15.20.11-001-304263209000021-2018",
+    },
+    BEST26: {
+        function: createPdfBest26,
+        tuSummerSmall: "ТУ 15.20.11-001-0138568596-2022",
+        tuSummerBig: "ТУ 15.20.11-001-304263209000021-2018",
+    },
+};
+
+// Универсальный обработчик для всех брендов
+exports.createBarcodeHandler = async (req, res) => {
     try {
-        // models = { articles: {
-        // sizes: [${size}]
-        // }}
-        const { brand, platform, apiCategory, models } = req.body;
+        const { brand, platform, apiCategory, dirName, models } = req.body;
+
+        // Проверка входных данных
         if (!brand || !platform || !apiCategory || !models) {
-            res.stetus(400).json({ error: 'Ошибка введенных данных. Не полные необходимые данные'})
+            return res.status(400).json({ error: 'Ошибка введенных данных. Не полные необходимые данные' });
         }
+
+        // Получение параметров бренда
+        const brandParams = brandMapping[brand.toUpperCase()];
+        if (!brandParams) {
+            return res.status(400).json({ error: `Бренд ${brand} не поддерживается` });
+        }
+
+        // Получение токена
         const token = await getApi(brand, platform, apiCategory);
         if (!token) {
-            res.status(500).json({ error: 'Ошибка получения токена по api'})
+            return res.status(500).json({ error: 'Ошибка получения токена по API' });
         }
-        //data = ((card, index) => {
-        //     console.log(`Карточка ${index + 1}:`);
-        //     console.log(`  - Артикул: ${card.article}`);
-        //     console.log(`  - Пол: ${card.gender}`);
-        //     console.log(`  - Состав: ${card.compound}`);
-        //     console.log(`  - Цвет: ${card.color}`);
-        //     console.log(`  - Размеры и SKU:`);
-        //     card.sizes.forEach(({ techSize, sku }) => {
-        //         console.log(`    - Размер: ${techSize}, SKU: ${sku}`);
-        //     });
-        //     console.log('\n');
-        // }); 
+
+        console.log("Запрос прошел");
+
+        // Получение данных карточек
         const data = await getDataFromWbCards(token);
         if (!Array.isArray(data) || data.length === 0) {
-            res.status(500).json({ error: 'Ошибка полуения данных моделей'})
+            return res.status(500).json({ error: 'Ошибка получения данных моделей' });
         }
 
-        const filterData = await filterDataCardsWB(data, models)
+        // Фильтрация данных
+        const filterData = await filterDataCardsWB(data, models);
 
-        // const barcodes = await arm2(filterData)
-        // res.status(200).json({ barcodes });
+        // Генерация штрих-кодов
+        await convertDataToPdf(filterData, dirName, brand, brandParams.tuSummerBig, brandParams.tuSummerSmall, brandParams.function);
+
+        // Ответ клиенту
+        res.status(200).json({ message: 'Штрих-коды успешно созданы' });
     } catch (error) {
-        console.error('Ошибка при выполнении', error.message)
-        res.status(500).json({ error: error.message })
+        console.error('Ошибка при выполнении', error.message);
+        res.status(500).json({ error: error.message });
     }
-}
+};

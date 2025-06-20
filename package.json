@@ -11,10 +11,14 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "canvas": "^3.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "fontkit": "^2.0.4",
+    "jsbarcode": "^3.12.1",
     "mysql2": "^3.14.1",
+    "pdf-lib": "^1.17.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   }

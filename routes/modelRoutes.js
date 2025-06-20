@@ -123,6 +123,8 @@ router.get('/:id', modelController.getModelById);
  */
 router.get('/', modelController.getAllModels);
 
+router.post('/brand_platform', modelController.getModelsByBrandAndPlatform);
+
 /**
  * @swagger
  * /api/models/wb:
