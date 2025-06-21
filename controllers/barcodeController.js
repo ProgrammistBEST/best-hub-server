@@ -52,7 +52,7 @@ exports.createBarcodeHandler = async (req, res) => {
         }
 
         // Получение токена
-        const token = "test";
+        const token = await getApi(brand, platform, apiCategory);
         if (!token) {
             return res.status(500).json({ error: 'Ошибка получения токена по API' });
         }
