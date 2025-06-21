@@ -93,25 +93,15 @@ async function createPdfArm2(savePath, shoeSize, barcode, article, color, standa
     // Поворачиваем страницу на 90 градусов
     page.setRotation(degrees(90));
 
-
-    // Сохраняем документ
-    let pdfBytes = await pdfDoc.save();
-    // Поворачиваем страницу на 90 градусов
-    const rotatedPdfDoc = await PDFDocument.load(pdfBytes);
-    const pages = rotatedPdfDoc.getPages();
-    pages.forEach(async page => {
-        page.setRotation(degrees(90)); // Поворачиваем страницу на 90 градусов
-    });
-
     // Добавляем штрих-код
     const barcodeWidth = 53 * mmToPoints;
     const barcodeHeight = 18 * mmToPoints;
-    const barcodeX = 10; // Координата X штрих-кода
-    const barcodeY = 10; // Координата Y штрих-кода
-    await addBarcode(rotatedPdfDoc, pages[0], barcode, barcodeX, barcodeY, barcodeWidth, barcodeHeight, mmToPoints, customBoldFont);
+    const barcodeX = 70 * mmToPoints; // Координата X штрих-кода
+    const barcodeY = 8; // Координата Y штрих-кода
+    await addBarcode(pdfDoc, page, barcode, barcodeX, barcodeY, barcodeWidth, barcodeHeight, mmToPoints, customBoldFont);
 
     // Сохраняем измененный документ
-    pdfBytes = await rotatedPdfDoc.save();
+    const pdfBytes = await pdfDoc.save();
     fs.writeFileSync(savePath, pdfBytes);
 }
 
@@ -235,19 +225,21 @@ async function addBarcode(pdfDoc, page, barcode, x, y, width, height, mmToPoints
         y,
         width,
         height,
+        rotate: degrees(90),
     });
 
     // Добавляем текст под штрих-кодом
-    const barcodeTextX = (page.getWidth() - width) / 2;
-    const barcodeTextY = y - 10 * mmToPoints; // Отступ над штрих-кодом
+    const barcodeTextX = x + 5 * mmToPoints; // Отступ над штрих-кодом
+    const barcodeTextY = y + 4 * mmToPoints; // Отступ над штрих-кодом
     page.drawText(barcode, {
         x: barcodeTextX,
         y: barcodeTextY,
-        size: 12,
+        size: 20,
         font: customBoldFont,
         color: rgb(0, 0, 0),
         width: width,
         align: "center",
+        rotate: degrees(90),
     });
 }
 
