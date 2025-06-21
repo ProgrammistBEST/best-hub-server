@@ -13,8 +13,10 @@ const JsBarcode = require('jsbarcode');
  * @param {string} tuSummerSmall - ТУ для маленьких размеров.
  * @param {Function} createPdf - Функция для создания PDF.
  */
-function convertDataToPdf(models, saveCatalogue, brandName, tuSummerBig, tuSummerSmall, createPdf) {
-    models.forEach((card) => {
+async function convertDataToPdf(models, saveCatalogue, brandName, tuSummerBig, tuSummerSmall, createPdf) {
+    const pdfFiles = []; // Массив для хранения путей к PDF-файлам
+
+    for (const card of models) {
         const { article, color, sizes, gender } = card;
 
         // Создаем папку для бренда
@@ -36,7 +38,8 @@ function convertDataToPdf(models, saveCatalogue, brandName, tuSummerBig, tuSumme
         }
 
         // Создаем PDF для каждого размера
-        sizes.forEach(({ techSize, sku }) => {
+        for (const size of sizes) {
+            const { techSize, sku } = size;
             const pdfFileName = `${techSize}.pdf`;
             const pdfFilePath = path.join(modelDirColor, pdfFileName);
 
@@ -44,9 +47,14 @@ function convertDataToPdf(models, saveCatalogue, brandName, tuSummerBig, tuSumme
             const standard = parseInt(techSize.split("-").pop()) < 36 ? tuSummerSmall : tuSummerBig;
 
             // Создаем PDF
-            createPdf(pdfFilePath, techSize, sku, article, color, standard, gender);
-        });
-    });
+            await createPdf(pdfFilePath, techSize, sku, article, color, standard, gender);
+
+            // Добавляем путь к файлу в массив
+            pdfFiles.push(pdfFilePath);
+        }
+    }
+
+    return pdfFiles; // Возвращаем массив путей к PDF-файлам
 }
 
 /**

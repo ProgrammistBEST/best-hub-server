@@ -1,12 +1,15 @@
 const path = require('path');
+const fs = require('fs');
+const archiver = require('archiver');
+const tmp = require('tmp');
 const { getApi } = require(path.join(__dirname, '../database/api/apiCRUD'));
 const { getDataFromWbCards } = require(path.join(__dirname, '../services/getData/getDataFromWBCards'));
 const { filterDataCardsWB } = require(path.join(__dirname, '../utils/filterData'));
 const { convertDataToPdf } = require('../database/barcodes/utils/barcodeUtils');
-const { createPdfArm2 } = require('../database/barcodes/brands/arm2');
+const { createPdfArm2 } = require('../database/barcodes/brands/barcodeArm2');
 const { createPdfArmbest } = require('../database/barcodes/brands/barcodeArmbest');
-const { createPdfBest26 } = require('../database/barcodes/brands/best26');
-const { createPdfBestShoes } = require('../database/barcodes/brands/bestshoes');
+const { createPdfBest26 } = require('../database/barcodes/brands/barcodeBest26');
+const { createPdfBestShoes } = require('../database/barcodes/brands/barcodeBestShoes');
 
 // Маппинг брендов
 const brandMapping = {
@@ -35,7 +38,7 @@ const brandMapping = {
 // Универсальный обработчик для всех брендов
 exports.createBarcodeHandler = async (req, res) => {
     try {
-        const { brand, platform, apiCategory, dirName, models } = req.body;
+        const { brand, platform, apiCategory, models } = req.body;
 
         // Проверка входных данных
         if (!brand || !platform || !apiCategory || !models) {
@@ -49,7 +52,7 @@ exports.createBarcodeHandler = async (req, res) => {
         }
 
         // Получение токена
-        const token = await getApi(brand, platform, apiCategory);
+        const token = "test";
         if (!token) {
             return res.status(500).json({ error: 'Ошибка получения токена по API' });
         }
@@ -64,12 +67,39 @@ exports.createBarcodeHandler = async (req, res) => {
 
         // Фильтрация данных
         const filterData = await filterDataCardsWB(data, models);
+        console.log(filterData);
+        
+        // Создаем временную директорию
+        const tempDir = tmp.dirSync({ unsafeCleanup: true }).name;
 
         // Генерация штрих-кодов
-        await convertDataToPdf(filterData, dirName, brand, brandParams.tuSummerBig, brandParams.tuSummerSmall, brandParams.function);
+        const pdfFiles = await convertDataToPdf(filterData, tempDir, brand, brandParams.tuSummerBig, brandParams.tuSummerSmall, brandParams.function);
 
-        // Ответ клиенту
-        res.status(200).json({ message: 'Штрих-коды успешно созданы' });
+        // Создание архива
+        const archive = archiver('zip', {
+            zlib: { level: 9 }, // Уровень сжатия
+        });
+
+        // Устанавливаем заголовки для отправки архива
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', 'attachment; filename=barcodes.zip');
+
+        // Отправляем архив клиенту
+        archive.pipe(res);
+
+        // Добавляем файлы в архив с сохранением структуры папок
+        pdfFiles.forEach((filePath) => {
+            const relativePath = path.relative(tempDir, filePath); // Относительный путь внутри архива
+            archive.file(filePath, { name: relativePath });
+        });
+
+        // Завершаем архивирование
+        archive.finalize();
+
+        // Очищаем временную директорию после завершения
+        archive.on('end', () => {
+            tmp.setGracefulCleanup();
+        });
     } catch (error) {
         console.error('Ошибка при выполнении', error.message);
         res.status(500).json({ error: error.message });

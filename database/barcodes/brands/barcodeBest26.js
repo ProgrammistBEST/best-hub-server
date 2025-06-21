@@ -1,9 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 const { PDFDocument, rgb, degrees } = require('pdf-lib');
-const { createCanvas } = require('canvas');
-const JsBarcode = require('jsbarcode');
 const fontkit = require('fontkit');
+const { addBarcode } = require('../utils/barcodeUtils');
 
 async function createPdfBest26(savePath, shoeSize, barcode, article, color, standard, gender) {
     // Создаем новый PDF-документ

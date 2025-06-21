@@ -88,9 +88,10 @@ async function createPdfArm2(savePath, shoeSize, barcode, article, color, standa
         "Размер:": shoeSize,
         "Состав:": "Этиленвинилацетат",
     };
-    await drawTable(page, tableData, customFont, customBoldFont, mmToPoints);
+    await drawTable(page, tableData, customFont, customBoldFont);
+    
     // Поворачиваем страницу на 90 градусов
-    page.setRotation(degrees(180));
+    page.setRotation(degrees(90));
 
 
     // Сохраняем документ
@@ -107,7 +108,7 @@ async function createPdfArm2(savePath, shoeSize, barcode, article, color, standa
     const barcodeHeight = 18 * mmToPoints;
     const barcodeX = 10; // Координата X штрих-кода
     const barcodeY = 10; // Координата Y штрих-кода
-    // await addBarcode(rotatedPdfDoc, pages[0], barcode, barcodeX, barcodeY, barcodeWidth, barcodeHeight, mmToPoints, customBoldFont);
+    await addBarcode(rotatedPdfDoc, pages[0], barcode, barcodeX, barcodeY, barcodeWidth, barcodeHeight, mmToPoints, customBoldFont);
 
     // Сохраняем измененный документ
     pdfBytes = await rotatedPdfDoc.save();
@@ -124,7 +125,7 @@ async function createPdfArm2(savePath, shoeSize, barcode, article, color, standa
  * @param {string} color - Цвет.
  * @param {string} shoeSize - Размер обуви.
  */
-async function drawTable(page, tableData, customFont, customBoldFont, mmToPoints) {
+async function drawTable(page, tableData, customFont, customBoldFont) {
     // Константы для таблицы
     const TABLE = {
         X: 11, // Начальная координата X таблицы

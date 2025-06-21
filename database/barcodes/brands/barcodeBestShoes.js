@@ -4,6 +4,7 @@ const { PDFDocument, rgb } = require('pdf-lib');
 const { createCanvas } = require('canvas');
 const JsBarcode = require('jsbarcode');
 const fontkit = require('fontkit');;
+const { addBarcode } = require('../utils/barcodeUtils');
 
 async function barcodeBestShoes(data, dirName) {
     const tuSummerSmall = "ТУ 15.20.11-001-0138568596-2022"; // ТУ для маленьких размеров
