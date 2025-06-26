@@ -57,8 +57,6 @@ exports.createBarcodeHandler = async (req, res) => {
             return res.status(500).json({ error: 'Ошибка получения токена по API' });
         }
 
-        console.log("Запрос прошел");
-
         // Получение данных карточек
         const data = await getDataFromWbCards(token);
         if (!Array.isArray(data) || data.length === 0) {
@@ -67,7 +65,6 @@ exports.createBarcodeHandler = async (req, res) => {
 
         // Фильтрация данных
         const filterData = await filterDataCardsWB(data, models);
-        console.log(filterData);
         
         // Создаем временную директорию
         const tempDir = tmp.dirSync({ unsafeCleanup: true }).name;

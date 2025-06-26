@@ -78,13 +78,15 @@ function getGeneralArticle(code) {
  * @param {number} height - Высота штрих-кода.
  */
 async function addBarcode(pdfDoc, page, barcode, x, y, width, height) {
+    // Создаем canvas для штрих-кода
     const canvas = createCanvas(width, height);
     JsBarcode(canvas, String(barcode), {
-        format: "EAN13",
+        format: "code128",
         displayValue: true,
         fontOptions: "bold",
     });
 
+    // Преобразуем canvas в изображение и внедряем его в PDF
     const imageBytes = canvas.toBuffer();
     const embeddedImage = await pdfDoc.embedPng(imageBytes);
     page.drawImage(embeddedImage, {
@@ -93,8 +95,17 @@ async function addBarcode(pdfDoc, page, barcode, x, y, width, height) {
         width,
         height,
     });
-}
 
+    // Добавляем текст с числовым значением штрих-кода под изображением
+    // const fontSize = 10; // Размер шрифта для текста
+    // const textYOffset = 5; // Отступ текста от нижней границы штрих-кода
+
+    // page.drawText(String(barcode), {
+    //     x: x, // Начало текста по оси X совпадает с началом штрих-кода
+    //     y: y - textYOffset - fontSize, // Текст располагается ниже штрих-кода
+    //     size: fontSize,
+    // });
+}
 
 module.exports = {
     convertDataToPdf,
