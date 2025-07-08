@@ -1,5 +1,5 @@
 const path = require('path');
-const { getAllSizes, createSize } = require(path.join(__dirname, '../database/models/sizeCRUD'));
+const { getAllSizes, createSize } = require('@database/models/sizeCRUD');
 
 // Получение всех платформ
 exports.getAllSizes = async (req, res) => {

@@ -1,0 +1,6 @@
+{
+  "watch": ["src"],
+  "ext": "js,json",
+  "ignore": ["honest_sign", "output"],
+  "exec": "node -r module-alias/register server.js"
+}

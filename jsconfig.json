@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".", 
+    "paths": {
+      "@/*": ["src/*"],
+      "@routes/*": ["src/routes/*"],
+      "@controllers/*": ["src/controllers/*"],
+      "@services/*": ["src/services/*"],
+      "@utils/*": ["src/utils/*"],
+      "@database/*": ["src/database/*"],
+      "@config/*": ["src/config/*"],
+      "@assets/*": ["src/assets/*"],
+      "@excel/*": ["src/excel/*"]
+    }
+  },
+  "include": ["src", "server.js"]
+}

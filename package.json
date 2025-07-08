@@ -8,20 +8,39 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodemon"
   },
   "dependencies": {
     "archiver": "^7.0.1",
+    "axios": "^1.10.0",
     "canvas": "^3.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
+    "exceljs": "^4.4.0",
     "express": "^5.1.0",
     "fontkit": "^2.0.4",
     "jsbarcode": "^3.12.1",
+    "module-alias": "^2.2.3",
     "mysql2": "^3.14.1",
     "pdf-lib": "^1.17.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "tmp": "^0.2.3"
+    "tmp": "^0.2.3",
+    "xlsx-populate": "^1.21.0"
+  },
+  "_moduleAliases": {
+    "@": "src",
+    "@controllers": "src/controllers",
+    "@routes": "src/routes",
+    "@services": "src/services",
+    "@utils": "src/utils",
+    "@database": "src/database",
+    "@config": "src/config",
+    "@assets": "src/assets",
+    "@excel": "src/excel"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }

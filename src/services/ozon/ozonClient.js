@@ -1,9 +1,12 @@
 const axios = require('axios');
-const { clientID, apiKey } = require('../../config/ozonApi');
 
 const baseURL = 'https://api-seller.ozon.ru';
 
-async function makeRequest(method, endpoint, data = null) {
+// Конфигурация для запросов
+const clientID = '507132';
+const apiKey = '68f0865f-4334-42b3-b189-a3cff5a3a7b0';
+
+async function makeRequestOZON(method, endpoint, data = null) {
     try {
         const response = await axios({
             method,
@@ -22,4 +25,4 @@ async function makeRequest(method, endpoint, data = null) {
     }
 }
 
-module.exports = { makeRequest };
+module.exports = { makeRequestOZON };

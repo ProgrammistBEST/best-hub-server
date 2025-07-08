@@ -1,4 +1,4 @@
-const { makeRequest } = require('./ozonClient');
+const { makeRequestOZON } = require('./ozonClient');
 
 async function getPriceGoods() {
     const endpoint = "/v5/product/info/prices";
@@ -11,7 +11,7 @@ async function getPriceGoods() {
         },
         limit: 100
     };
-    const response = await makeRequest('POST', endpoint, data);
+    const response = await makeRequestOZON('POST', endpoint, data);
     return response.items;
 }
 

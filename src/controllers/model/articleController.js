@@ -1,6 +1,5 @@
-const path = require('path');
-const { getArticleById, getAllArticles, createArticle, updateArticleById, deleteArticleById } = require(path.join(__dirname, '../database/models/articleCRUD'));
-const { checkDuplicate } = require(path.join(__dirname, '../utils/checkDuplicate'));
+const { getArticleById, getAllArticles, createArticle, updateArticleById, deleteArticleById } = require('@database/models/articleCRUD');
+const { checkDuplicate } = require('@utils/checkDuplicate');
 
 // Получение артикула по ID
 exports.getArticleById = async (req, res) => {

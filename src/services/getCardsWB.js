@@ -7,7 +7,7 @@ async function getCardsWB(headers) {
         let cursor = initializeCursor(batchSize);
 
         while (true) {
-            const response = await makeRequest(apiUrl, headers, cursor);
+            const response = await makeRequestWB(apiUrl, headers, cursor);
             const { cards, updatedCursor } = extractDataFromResponse(response);
 
             allCards.push(...cards);
@@ -26,7 +26,7 @@ function initializeCursor(limit) {
     return { limit };
 }
 
-async function makeRequest(url, headers, cursor) {
+async function makeRequestWB(url, headers, cursor) {
     const response = await fetch(url, {
         method: "POST",
         headers: {

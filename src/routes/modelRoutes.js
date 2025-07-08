@@ -1,7 +1,6 @@
-const path = require('path');
 const express = require('express');
 const router = express.Router();
-const modelController = require(path.join(__dirname, '../controllers/modelController'));
+const modelController = require('@controllers/model/modelController');
 
 /**
  * @swagger

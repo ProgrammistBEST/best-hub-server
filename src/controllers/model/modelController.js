@@ -1,7 +1,7 @@
 const path = require('path');
-const { getAllModels, createModelsWithWB, getModelById, getModelsByBrandAndPlatform, createModel, updateModelById } = require(path.join(__dirname, '../database/models/modelCRUD'));
-const { getApi } = require(path.join(__dirname, '../database/api/apiCRUD'));
-const { getDataFromWbCards } = require(path.join(__dirname, '../services/getData/getDataFromWBCards'));
+const { getAllModels, createModelsWithWB, getModelById, getModelsByBrandAndPlatform, createModel, updateModelById } = require('@database/models/modelCRUD');
+const { getApi } = require('@database/api/apiCRUD');
+const { getDataFromWbCards } = require('@services/getData/getDataFromWBCards');
 
 // Получение всех моделей
 exports.getAllModels = async (req, res) => {

@@ -1,7 +1,7 @@
 const path = require('path');
 const express = require('express');
 const router = express.Router();
-const sizeController = require(path.join(__dirname, '../controllers/sizeController'));
+const sizeController = require('@controllers/model/sizeController');
 
 router.get('/', sizeController.getAllSizes);
 

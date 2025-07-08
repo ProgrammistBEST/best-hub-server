@@ -4,7 +4,7 @@ const fs = require('fs');
 
 async function loadCategoryValuesByOfferId(offerIdRaw) {
     const offerId = offerIdRaw.replace(/\(.*?\)/, '').trim();
-    const filePath = path.join(__dirname, '../../../assets/data/categories.xlsx');
+    const filePath = path.join(__dirname, '../../assets/categories.xlsx');
 
     if (!fs.existsSync(filePath)) return { valueF: 50, expense: 100 };
 
@@ -17,7 +17,7 @@ async function loadCategoryValuesByOfferId(offerIdRaw) {
         if (cellValue === offerId) {
             const valueF = row.getCell('F').value || 0;
             const expense = row.getCell('C').value || 0;
-            return { valueF, expense };
+            return { valueF, expense: expense.result };
         }
     }
 

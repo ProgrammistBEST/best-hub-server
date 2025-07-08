@@ -1,7 +1,6 @@
-const path = require('path');
 const express = require('express');
 const router = express.Router();
-const externalArticleController = require(path.join(__dirname, '../controllers/externalArticleController'));
+const externalArticleController = require('@controllers/model/externalArticleController');
 
 router.get('/:id', externalArticleController.getExternalArticleById);
 router.get('/', externalArticleController.getAllExternalArticles);

@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 async function loadTemplate(fileName) {
-    const filePath = path.join(__dirname, '../../assets/templates', fileName);
+    const filePath = "C:\\Users\\prog\\Desktop\\Programs\\best-hub-server\\src\\assets\\tamplates\\template_price.xlsm"
     if (!fs.existsSync(filePath)) {
         throw new Error(`Файл шаблона ${fileName} не найден`);
     }

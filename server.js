@@ -1,24 +1,26 @@
+require('module-alias/register');
 require('dotenv').config();
 const express = require('express');
-const app = express();
 const cors = require('cors');
-const { db } = require('./config/db');
-const path = require('path');
+const app = express();
+const { db } = require('@config/db');
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // Подключение маршрутов
-const platformRoutes = require(path.join(__dirname, './routes/platformRoutes'));
-const apiCategoryRoutes = require(path.join(__dirname, './routes/apiCategoryRoutes'));
-const modelRoutes = require(path.join(__dirname, './routes/modelRoutes'));
-const brandRoutes = require(path.join(__dirname, './routes/brandRoutes'));
-const barcodeRoutes = require(path.join(__dirname, './routes/barcodeRoutes'));
-const articleRoutes = require(path.join(__dirname, './routes/articleRoutes'));
-const sizeRoutes = require(path.join(__dirname, './routes/sizeRoutes'));
-const externalArticleRoutes = require(path.join(__dirname, './routes/externalArticleRoutes'));
+const platformRoutes = require('@routes/platformRoutes');
+const apiCategoryRoutes = require('@routes/apiCategoryRoutes');
+const modelRoutes = require('@routes/modelRoutes');
+const brandRoutes = require('@routes/brandRoutes');
+const barcodeRoutes = require('@routes/barcodeRoutes');
+const articleRoutes = require('@routes/articleRoutes');
+const sizeRoutes = require('@routes/sizeRoutes');
+const externalArticleRoutes = require('@routes/externalArticleRoutes');
+const excelRoutes = require('@routes/excelRoutes');
 
+app.use('/api/excel', excelRoutes);
 app.use('/api/platforms', platformRoutes);
 app.use('/api/api-categories', apiCategoryRoutes);
 app.use('/api/models', modelRoutes);
@@ -29,7 +31,7 @@ app.use('/api/sizes', sizeRoutes);
 app.use('/api/external-articles', externalArticleRoutes);
 
 // Документация Swagger
-const { specs, swaggerUi } = require('./swagger'); // Импортируем Swagger
+const { specs, swaggerUi } = require('./src/swagger'); // Импортируем Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Запуск сервера

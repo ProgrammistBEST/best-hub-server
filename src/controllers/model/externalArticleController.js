@@ -1,12 +1,11 @@
-const path = require('path');
 const {
     getExternalArticle,
     getAllExternalArticles,
     createExternalArticle,
     updateExternalArticleById,
     deleteExternalArticleById
-} = require(path.join(__dirname, '../database/models/externalArticleCRUD'));
-const { checkForDuplicateExternalArticle } = require(path.join(__dirname, '../utils/checkDuplicate'))
+} = require('@database/models/externalArticleCRUD');
+const { checkForDuplicateExternalArticle } = require('@utils/checkDuplicate');
 
 // Получение внешнего артикула по ID
 exports.getExternalArticleById = async (req, res) => {
