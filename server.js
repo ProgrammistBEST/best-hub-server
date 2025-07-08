@@ -20,7 +20,7 @@ const sizeRoutes = require(path.join(__dirname, './routes/sizeRoutes'));
 const externalArticleRoutes = require(path.join(__dirname, './routes/externalArticleRoutes'));
 
 app.use('/api/platforms', platformRoutes);
-app.use('/api/categories', apiCategoryRoutes);
+app.use('/api/api-categories', apiCategoryRoutes);
 app.use('/api/models', modelRoutes);
 app.use('/api/brands', brandRoutes);
 app.use('/api/barcodes', barcodeRoutes);
