@@ -2,6 +2,12 @@ const path = require('path');
 const XlsxPopulate = require('xlsx-populate');
 const { loadCategoryValuesByOfferId } = require('@excel/utils/categoryLookup');
 const exceljs = require('exceljs');
+
+/**
+ * Загружает цены из Excel-файла в Map.
+ * @param {string} filePath - Путь к файлу с ценами.
+ * @returns {Promise<Map>} - Map с артикулами и ценами.
+ */
 async function loadPricesFromExcel(filePath) {
     try {
         const workbook = new exceljs.Workbook();
@@ -38,9 +44,14 @@ async function loadPricesFromExcel(filePath) {
     }
 }
 
-const installFileEditingAction = async (data) => {
+/**
+ * Генерирует файл для редактирования акций.
+ * @param {Array} data - Данные для обработки.
+ * @returns {Promise<Buffer>} - Буфер сгенерированного файла.
+ */
+const generateFileEditingAction = async (data) => {
     try {
-        const percent = 20
+        const percent = 20;
         const factorPercent = (100 - percent) / 100;
 
         const templatePath = path.join(__dirname, '..', 'assets/templates', 'template.xlsm');
@@ -76,21 +87,25 @@ const installFileEditingAction = async (data) => {
             );
         }
 
-        const outputPath = path.join(__dirname, 'output', `Файл для редактирования акций ${Date.now()}.xlsm`);
-        await workbook.toFileAsync(outputPath);
-
-        console.log("Файл успешно сохранен:", outputPath);
+        // Возвращаем буфер файла без сохранения на диск
+        return await workbook.outputAsync();
     } catch (error) {
         console.error("Ошибка при создании Excel:", error.message);
         throw error;
     }
 };
 
-async function installPriceEditing(data, ws) {
+/**
+ * Генерирует файл для редактирования цен.
+ * @param {Array} data - Данные для обработки.
+ * @param {Object} ws - Рабочий лист Excel.
+ * @returns {Promise<Buffer>} - Буфер сгенерированного файла.
+ */
+async function generatePriceEditing(data, ws) {
     try {
         if (!Array.isArray(data)) {
             console.error("Данные не являются массивом:", data);
-            return;
+            throw new Error("Неверный формат данных.");
         }
 
         const percent = 20;
@@ -119,14 +134,12 @@ async function installPriceEditing(data, ws) {
             };
         }
 
-        const outputPath = path.join(__dirname, 'output', `Редактирование цен ${Date.now()}.xlsx`);
         const workbook = ws.workbook;
-        await workbook.xlsx.writeFile(outputPath);
-
-        console.log(`Файл успешно сохранен: ${outputPath}`);
+        return await workbook.xlsx.writeBuffer(); // Возвращаем буфер без сохранения на диск
     } catch (error) {
         console.error("Произошла ошибка при формировании файла Excel:", error.message);
+        throw error;
     }
 }
 
-module.exports = { installFileEditingAction, installPriceEditing }
+module.exports = { generateFileEditingAction, generatePriceEditing };
