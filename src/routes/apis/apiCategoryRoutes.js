@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const apiCategoryController = require('../controllers/apiCategoryController');
+const apiCategoryController = require('@controllers/apiCategoryController');
 
 /**
  * @swagger
@@ -33,7 +33,7 @@ const apiCategoryController = require('../controllers/apiCategoryController');
  *                 id:
  *                   type: integer
  *                   description: ID категории API
- *                 category:
+ *                 api_category:
  *                   type: string
  *                   description: Название категории API
  *       404:
@@ -60,7 +60,7 @@ router.get('/:id', apiCategoryController.getApiCategoryById);
  *                   id:
  *                     type: integer
  *                     description: ID категории API
- *                   category:
+ *                   api_category:
  *                     type: string
  *                     description: Название категории API
  */

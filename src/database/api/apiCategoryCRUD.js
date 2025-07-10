@@ -1,6 +1,5 @@
-const path = require('path');
-const { db } = require(path.join(__dirname, '../../config/db'));
-const { ensureDatabaseConnection } = require(path.join(__dirname, '../../utils/errorHandler'));
+const { db } = require('@config/db');
+const { ensureDatabaseConnection } = require('@utils/errorHandler');
 
 // Получение категории API по ID
 async function getApiCategoryById(apiCategoryId) {

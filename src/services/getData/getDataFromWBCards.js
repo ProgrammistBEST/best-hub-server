@@ -1,5 +1,5 @@
 const path = require('path');
-const { getCardsWB } = require(path.join(__dirname, '../getCardsWB'));
+const { getCardsWB } = require('@/services/getCardsWB');
 
 async function getDataFromWbCards(headers) {
     try {

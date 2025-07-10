@@ -1,7 +1,7 @@
 const path = require('path');
 const express = require('express');
 const router = express.Router();
-const brandController = require(path.join(__dirname, '../controllers/brandController'));
+const brandController = require('@controllers/brandController');
 
 /**
  * @swagger

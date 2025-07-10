@@ -84,7 +84,7 @@ async function createPdfArmbest(savePath, shoeSize, barcode, article, color, sta
     // Добавляем штрих-код
     const barcodeWidth = 54 * mmToPoints;
     const barcodeHeight = 19 * mmToPoints;
-    const barcodeX = 5;
+    const barcodeX = 7;
     const barcodeY = 10; // Координата Y штрих-кода
     await addBarcode(pdfDoc, page, barcode, barcodeX, barcodeY, barcodeWidth, barcodeHeight);
     

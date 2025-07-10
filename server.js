@@ -11,7 +11,8 @@ app.use(express.json());
 
 // Подключение маршрутов
 const platformRoutes = require('@routes/platformRoutes');
-const apiCategoryRoutes = require('@routes/apiCategoryRoutes');
+const apiCategoryRoutes = require('@routes/apis/apiCategoryRoutes');
+const apisRoutes = require('@routes/apis/apisRoutes');
 const modelRoutes = require('@routes/modelRoutes');
 const brandRoutes = require('@routes/brandRoutes');
 const barcodeRoutes = require('@routes/barcodeRoutes');
@@ -23,6 +24,7 @@ const excelRoutes = require('@routes/excelRoutes');
 app.use('/api/excel', excelRoutes);
 app.use('/api/platforms', platformRoutes);
 app.use('/api/api-categories', apiCategoryRoutes);
+app.use('/api/apis', apisRoutes);
 app.use('/api/models', modelRoutes);
 app.use('/api/brands', brandRoutes);
 app.use('/api/barcodes', barcodeRoutes);
