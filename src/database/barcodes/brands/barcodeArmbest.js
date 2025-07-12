@@ -12,7 +12,7 @@ async function createPdfArmbest(savePath, shoeSize, barcode, article, color, sta
     pdfDoc.registerFontkit(fontkit);
 
     // Добавляем страницу
-    const page = pdfDoc.addPage([58 * 72 / 25.4, 80 * 72 / 25.4]); // Размер в мм
+    const page = pdfDoc.addPage([62 * 72 / 25.4, 80 * 72 / 25.4]); // Размер в мм
 
     // Константы для преобразования миллиметров в точки
     const mmToPoints = 72 / 25.4;

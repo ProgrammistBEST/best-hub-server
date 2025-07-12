@@ -6,14 +6,14 @@ const { makeRequestOZON } = require('./ozonClient');
  * @param {string} apiKey - API-ключ клиента Ozon.
  * @returns {Promise<Array>} - Список товаров с ценами.
  */
-async function getPriceGoods(clientID, apiKey) {
+async function getWarehouseBalances(clientID, apiKey) {
     const headers = {
         'Client-Id': clientID,
         'Api-Key': apiKey,
         'Content-Type': 'application/json'
     };
 
-    const endpoint = "/v5/product/info/prices";
+    const endpoint = "/v4/product/info/stocks";
     let cursor = "";
     let allItems = [];
 
@@ -38,5 +38,4 @@ async function getPriceGoods(clientID, apiKey) {
     return allItems;
 }
 
-
-module.exports = { getPriceGoods };
+module.exports = { getWarehouseBalances };

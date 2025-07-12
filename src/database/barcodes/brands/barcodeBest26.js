@@ -12,7 +12,7 @@ async function createPdfBest26(savePath, shoeSize, barcode, article, color, stan
     pdfDoc.registerFontkit(fontkit);
 
     // Добавляем страницу
-    const page = pdfDoc.addPage([80 * 72 / 25.4, 58 * 72 / 25.4]);
+    const page = pdfDoc.addPage([80 * 72 / 25.4, 62 * 72 / 25.4]);
 
     // Константы для преобразования миллиметров в точки
     const mmToPoints = 72 / 25.4;
